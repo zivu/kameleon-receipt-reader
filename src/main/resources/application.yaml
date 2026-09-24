@@ -1,0 +1,35 @@
+server:
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+spring:
+  application:
+    name: kameleon-receipts-reader
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 8MB
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 500632763514-c9emfbg99m141n6lqndf47md81pnlgn0.apps.googleusercontent.com
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+logging:
+  level:
+    root: info
+openai:
+  api:
+    url: https://api.openai.com/v1/chat/completions
+    key: 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
+kameleon:
+  redirect:
+    url: http://localhost:4200
