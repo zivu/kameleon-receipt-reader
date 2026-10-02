@@ -1,5 +1,6 @@
 package com.example.kameleon_receipts_reader.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,12 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SpringSecurity {
 
+    /**
+     * Defines URL to redirect after authentication.
+     */
     @Value("${kameleon.redirect.url}")
     private String redirectUrl;
 
@@ -25,8 +30,7 @@ public class SpringSecurity {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/error").permitAll()
-                .anyRequest().authenticated()
-        )
+                .anyRequest().authenticated())
                 .oauth2Login(oauth ->
                         oauth.defaultSuccessUrl(redirectUrl, true))
                 .cors(Customizer.withDefaults())
@@ -36,14 +40,18 @@ public class SpringSecurity {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", buildCorsConfig());
+        return source;
+    }
+
+    private CorsConfiguration buildCorsConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of(redirectUrl));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
-        var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration);
-        return source;
+        return corsConfiguration;
     }
 
 }

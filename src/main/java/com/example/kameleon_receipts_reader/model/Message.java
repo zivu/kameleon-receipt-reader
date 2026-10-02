@@ -8,5 +8,5 @@ package com.example.kameleon_receipts_reader.model;
  *                    or "system" when we want to provide additional setup (like "You are English to Polish translator").
  * @param content either exact question from a user or content of how the chat should behave.
  */
-public record Message(Role role, String content) {
+public record Message(String role, String content) {
 }

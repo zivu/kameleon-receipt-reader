@@ -26,10 +26,16 @@ spring:
 logging:
   level:
     root: info
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: TRACE
+    org:
+      apache:
+        coyote:
+          http11: DEBUG
 openai:
   api:
     url: https://api.openai.com/v1/chat/completions
-    key: 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
+    key: ${OPEN_API_KEY}
 kameleon:
   redirect:
     url: http://localhost:4200

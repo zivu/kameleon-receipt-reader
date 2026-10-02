@@ -4,6 +4,7 @@ import com.example.kameleon_receipts_reader.model.ChatResponse;
 import com.example.kameleon_receipts_reader.model.Items;
 import com.example.kameleon_receipts_reader.model.Message;
 import com.example.kameleon_receipts_reader.model.Role;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -17,9 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+/**
+ * This service analyses provided receipt text and provides detailed pricing info.
+ */
 @Service
 @RequiredArgsConstructor
-public class ChatGPTService {
+public class ChatGPTService implements AnalysisService {
 
     public static final String AUTHORIZATION = "Authorization";
     public static final String CONTENT_TYPE = "Content-Type";
@@ -128,27 +132,49 @@ public class ChatGPTService {
             ]
             }
             """;
-    public static final String MODEL = "model";
-    public static final String GPT_4_TURBO = "gpt-5.6-luna";
-    public static final String MESSAGES = "messages";
+    /**
+     * Key which specifies ChatGPT model.
+     */
+    public static final String MODEL_ATTRIBUTE = "model";
+    /**
+     * Model value.
+     */
+    public static final String GPT_VER_TO_USE = "gpt-5.6-luna";
+    /**
+     * List of configuration and user request messages to ChatGPT.
+     */
+    public static final String MESSAGES_ATTRIBUTE = "messages";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Your secret OpenAI API KEY.
+     */
     @Value("${openai.api.key}")
     private String apiKey;
 
+    /**
+     * Which OpenAI REST API to call.
+     */
     @Value("${openai.api.url}")
     private String apiURL;
 
-    public Items translate(String recordedSpeech) {
-        Message userRequest = new Message(Role.user, recordedSpeech);
-        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(createRequestBody(userRequest), createHeaders());
-        ChatResponse response = restTemplate.exchange(apiURL, HttpMethod.POST, httpEntity, ChatResponse.class).getBody();
+    /**
+     * Parses provided receipt text.
+     * @param textToBeAnalysed text retrieved from receipt image.
+     * @return pricing information.
+     */
+    public Items analyse(@NonNull String textToBeAnalysed) {
+        ChatResponse response = restTemplate.exchange(apiURL, HttpMethod.POST, createHttpEntity(textToBeAnalysed), ChatResponse.class).getBody();
         if (!hasResponseMessage(response)) {
             throw new NoSuchElementException("No response returned from Chat Completions API");
         }
         return objectMapper.readValue(response.getChoices().getFirst().getMessage().getContent(), Items.class);
+    }
+
+    private HttpEntity<Map<String, Object>> createHttpEntity(String textToBeAnalysed) {
+        return new HttpEntity<>(createRequestBody(textToBeAnalysed), createHeaders());
     }
 
     private static boolean hasResponseMessage(ChatResponse response) {
@@ -156,11 +182,11 @@ public class ChatGPTService {
                 && null != response.getChoices().getFirst().getMessage();
     }
 
-    private static Map<String, Object> createRequestBody(Message userRequest) {
-        Message chatConfig = new Message(Role.system, CHAT_FUNCTIONALITY_DESCRIPTION);
-//        Message chatConfig = new Message(Role.system, LAWYER_TRANSLATOR);
-        return Map.of(MODEL, GPT_4_TURBO,
-                MESSAGES, List.of(chatConfig, userRequest));
+    private static Map<String, Object> createRequestBody(String textToBeAnalysed) {
+        Message chatConfig = new Message(Role.SYSTEM.getRole(), CHAT_FUNCTIONALITY_DESCRIPTION);
+        Message userRequest = new Message(Role.USER.getRole(), textToBeAnalysed);
+        return Map.of(MODEL_ATTRIBUTE, GPT_VER_TO_USE,
+                MESSAGES_ATTRIBUTE, List.of(chatConfig, userRequest));
     }
 
     private HttpHeaders createHeaders() {
