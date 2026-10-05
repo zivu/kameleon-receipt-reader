@@ -11,8 +11,9 @@ This backend service has frontend application kameleon-receipt-reader-frontend.
 4. Maven.
 
 ### External services used
-1. Google Vision.
-2. ChatGPT.
+1. Google Auth.
+2. Google Vision.
+3. ChatGPT.
 
 ### Setup
 1. Setup `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to your private key json.
