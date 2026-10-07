@@ -10,9 +10,10 @@ import com.google.protobuf.ByteString;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class GoogleVisionService implements RecognitionService {
      * @return text from provided receipt.
      */
     @Override
-    public String process(@NonNull MultipartFile receipt) {
+    public String process(@NonNull Path receipt) {
         try(var client = ImageAnnotatorClient.create()) {
             List<AnnotateImageRequest> request = List.of(buildImageRequest(receipt));
             BatchAnnotateImagesResponse response = client.batchAnnotateImages(request);
@@ -55,7 +56,7 @@ public class GoogleVisionService implements RecognitionService {
         return NO_RESPONSE_RETURNED;
     }
 
-    private static AnnotateImageRequest buildImageRequest(MultipartFile receipt) throws IOException {
+    private static AnnotateImageRequest buildImageRequest(Path receipt) throws IOException {
         return AnnotateImageRequest.newBuilder()
                 .setImage(buildImage(receipt))
                 .addFeatures(buildDescription())
@@ -68,9 +69,9 @@ public class GoogleVisionService implements RecognitionService {
                 .build();
     }
 
-    private static Image buildImage(MultipartFile receipt) throws IOException {
+    private static Image buildImage(Path receipt) throws IOException {
         return Image.newBuilder()
-                .setContent(ByteString.copyFrom(receipt.getBytes()))
+                .setContent(ByteString.copyFrom(Files.readAllBytes(receipt)))
                 .build();
     }
 

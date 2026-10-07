@@ -6,6 +6,7 @@ import com.example.kameleon_receipts_reader.model.Message;
 import com.example.kameleon_receipts_reader.model.Role;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import java.util.NoSuchElementException;
 /**
  * This service analyses provided receipt text and provides detailed pricing info.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatGPTService implements AnalysisService {
