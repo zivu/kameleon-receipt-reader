@@ -40,6 +40,7 @@ logging:
     root: info
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: TRACE
+    org.springframework.web.cors: DEBUG
     org:
       apache:
         coyote:

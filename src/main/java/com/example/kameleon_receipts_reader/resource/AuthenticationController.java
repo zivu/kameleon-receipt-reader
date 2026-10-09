@@ -12,7 +12,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"https://angular-test-970a4.web.app", "http://localhost:4200"})
+@CrossOrigin(origins = {"https://angular-test-970a4.web.app", "http://localhost:4200", "https://zivu.github.io"}, allowCredentials = "true")
 public class AuthenticationController {
 
     /**
