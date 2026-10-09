@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/receipt")
-@CrossOrigin(origins = {"https://angular-test-970a4.web.app", "http://localhost:4200", "https://zivu.github.io/kameleon-receipt-reader-frontend"})
+@CrossOrigin(origins = {"https://angular-test-970a4.web.app", "http://localhost:4200", "https://zivu.github.io"}, allowCredentials = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class ReceiptController {

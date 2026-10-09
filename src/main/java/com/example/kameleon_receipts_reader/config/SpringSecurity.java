@@ -34,6 +34,7 @@ public class SpringSecurity {
                 .requestMatchers("/", "/error").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/receipt/*").permitAll()
+                .requestMatchers("/api/auth/me").authenticated()
                 .anyRequest().authenticated())
                 .oauth2Login(oauth ->
                         oauth.defaultSuccessUrl(redirectUrl, true))
@@ -52,7 +53,7 @@ public class SpringSecurity {
 
     private CorsConfiguration buildCorsConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of(redirectUrl));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200", "https://zivu.github.io"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
