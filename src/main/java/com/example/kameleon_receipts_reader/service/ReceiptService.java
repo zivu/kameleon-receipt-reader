@@ -8,15 +8,16 @@ import com.example.kameleon_receipts_reader.repository.ReceiptRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.util.UUID;
 
 /**
  * This service processes image by colling Recognition Service and analyses receipt via Analysis Service.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReceiptService {
@@ -32,13 +33,11 @@ public class ReceiptService {
     private final ReceiptRepository receiptRepository;
 
     /**
-     * Receives receiptPath photo and calculates the cost of a separate positions of a meal.
-     * @param receiptPath image file.
-     * @return analysed receiptPath which shows detailed information about pricing.
+     * Receives uploadedReceipt photo and calculates the cost of a separate positions of a meal.
+     * @param uploadedReceipt image file.
      */
-    @Async
-    public void process(@NonNull Path receiptPath, UUID uuid) {
-        String receiptText = recognitionService.process(receiptPath);
+    public void process(@NonNull MultipartFile uploadedReceipt, UUID uuid) {
+        String receiptText = recognitionService.process(uploadedReceipt);
         Items receiptItems = analysisService.analyse(receiptText);
         Receipt receipt = new Receipt();
         receipt.setId(uuid);
@@ -49,10 +48,6 @@ public class ReceiptService {
                     receiptItem.setReceipt(receipt);
                     receiptItem.setName(item.name());
                     receiptItem.setQuantity(item.quantity());
-                    receiptItem.setUnitPrice(item.unitPrice());
-                    receiptItem.setLinePriceBeforeDiscount(item.linePriceBeforeDiscount());
-                    receiptItem.setDiscount(item.discount());
-                    receiptItem.setLinePrice(item.linePrice());
                     receiptItem.setUnitPricePaid(item.unitPricePaid());
                     return receiptItem;
                 }).toList());
@@ -64,8 +59,7 @@ public class ReceiptService {
         return new Items(receipt.getItems()
                 .stream()
                 .map(entity ->
-                        new Item(entity.getName(), entity.getQuantity(), entity.getUnitPrice(), entity.getLinePriceBeforeDiscount(),
-                                entity.getDiscount(), entity.getLinePrice(), entity.getUnitPricePaid()))
+                        new Item(entity.getName(), entity.getQuantity(), entity.getUnitPricePaid()))
                 .toList());
     }
 

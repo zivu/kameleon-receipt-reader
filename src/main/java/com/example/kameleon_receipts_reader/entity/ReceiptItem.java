@@ -23,10 +23,6 @@ public class ReceiptItem {
     private Receipt receipt;
     private String name;
     private Integer quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal linePriceBeforeDiscount;
-    private BigDecimal discount;
-    private BigDecimal linePrice;
     private BigDecimal unitPricePaid;
 
 }

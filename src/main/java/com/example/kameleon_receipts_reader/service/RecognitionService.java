@@ -1,8 +1,7 @@
 package com.example.kameleon_receipts_reader.service;
 
 import lombok.NonNull;
-
-import java.nio.file.Path;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Bridge to be implemented by underlying image processor service.
@@ -14,6 +13,6 @@ public interface RecognitionService {
      * @param receipt path file image.
      * @return recognized receipt text.
      */
-    String process(@NonNull Path receipt);
+    String process(@NonNull MultipartFile receipt);
 
 }

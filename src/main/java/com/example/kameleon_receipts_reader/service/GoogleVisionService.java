@@ -8,12 +8,12 @@ import com.google.cloud.vision.v1.Image;
 import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.protobuf.ByteString;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -27,21 +27,22 @@ public class GoogleVisionService implements RecognitionService {
      * Fallback text in case there is no response.
      */
     public static final String NO_RESPONSE_RETURNED = "NO_RESPONSE_RETURNED";
+    private final ImageAnnotatorClient client = ImageAnnotatorClient.create();
+
+    public GoogleVisionService() throws IOException {
+    }
 
     /**
      * Calls Google Vision service and returns a receipt visible text.
      * @param receipt file image.
      * @return text from provided receipt.
      */
+    @SneakyThrows
     @Override
-    public String process(@NonNull Path receipt) {
-        try(var client = ImageAnnotatorClient.create()) {
+    public String process(@NonNull MultipartFile receipt) {
             List<AnnotateImageRequest> request = List.of(buildImageRequest(receipt));
             BatchAnnotateImagesResponse response = client.batchAnnotateImages(request);
             return processResponse(response.getResponsesList());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to process provided receipt", e);
-        }
     }
 
     private static String processResponse(List<AnnotateImageResponse> responses) {
@@ -56,7 +57,7 @@ public class GoogleVisionService implements RecognitionService {
         return NO_RESPONSE_RETURNED;
     }
 
-    private static AnnotateImageRequest buildImageRequest(Path receipt) throws IOException {
+    private static AnnotateImageRequest buildImageRequest(MultipartFile receipt) throws IOException {
         return AnnotateImageRequest.newBuilder()
                 .setImage(buildImage(receipt))
                 .addFeatures(buildDescription())
@@ -69,9 +70,9 @@ public class GoogleVisionService implements RecognitionService {
                 .build();
     }
 
-    private static Image buildImage(Path receipt) throws IOException {
+    private static Image buildImage(MultipartFile receipt) throws IOException {
         return Image.newBuilder()
-                .setContent(ByteString.copyFrom(Files.readAllBytes(receipt)))
+                .setContent(ByteString.copyFrom(receipt.getBytes()))
                 .build();
     }
 

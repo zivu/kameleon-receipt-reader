@@ -6,6 +6,9 @@ server:
         same-site: none
         secure: true
 spring:
+  threads:
+    virtual:
+      enabled: true
   h2:
     console:
       enabled: true

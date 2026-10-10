@@ -34,105 +34,43 @@ public class ChatGPTService implements AnalysisService {
     public static final String CHAT_FUNCTIONALITY_DESCRIPTION = """
             Parse the receipt and return **only the products/items that were purchased**.
             
-            Ignore all non-product information, including:
+            Ignore all non-product information, including store/company name and address, NIP, receipt number, tax information, payment information, card number, transaction numbers, cashier/register information, dates and times, marketing messages, BDO and system numbers, and VAT/tax summaries.
             
-            * store/company name and address
-            * NIP
-            * receipt number
-            * fiscal/tax information
-            * payment information
-            * card number
-            * transaction numbers
-            * cashier/register information
-            * dates and times
-            * marketing messages
-            * BDO and system numbers
-            * VAT/tax summaries
-            
-            For every purchased item, extract:
+            For every purchased item, extract only:
             
             1. `name` — the product name exactly or approximately as it appears on the receipt.
             2. `quantity` — how many units were purchased.
-            3. `unitPrice` — the original price of one unit before any discount.
-            4. `linePriceBeforeDiscount` — quantity × original unit price.
-            5. `discount` — the total discount applied to this line. Use `0` if there is no discount.
-            6. `linePrice` — the final amount actually paid for this line after discount.
-            7. `unitPricePaid` — the effective price actually paid for one unit after discount.
-            
-            ### Price calculation
-            
-            Receipts commonly contain lines in this form:
-            
-            `quantity x unitPrice lineTotal`
-            
-            For example:
-            
-            `2 x6,50 13,00`
-            
-            means:
-            
-            * quantity = 2
-            * original unit price = 6.50
-            * line price before discount = 13.00
-            
-            If the following line is:
-            
-            `OPUST -2,60`
-            
-            then the discount for that product line is 2.60.
-            
-            Therefore:
-            
-            `linePrice = linePriceBeforeDiscount - discount`
-            
-            and:
-            
-            `unitPricePaid = linePrice / quantity`
-            
-            For example:
-            
-            `2 x6,50 13,00`
-            `OPUST -2,60`
-            `10,40B`
-            
-            should produce:
-            
-            * quantity: 2
-            * unitPrice: 6.50
-            * linePriceBeforeDiscount: 13.00
-            * discount: 2.60
-            * linePrice: 10.40
-            * unitPricePaid: 5.20
+            3. `unitPricePaid` — the effective price actually paid for one unit after discounts.
             
             ### Important rules
             
             * A product may occupy multiple OCR lines. Combine those lines into one product.
-            * `OPUST` means a discount and should **not** be treated as a product.
-            * The amount immediately after the discount is normally the final price of that product line.
-            * Do not create a separate product for a discount line.
-            * Do not include `SUMA PLN`, `PTU`, `SPRZEDAŻ OPODATKOWANA`, or payment amounts as products.
-            * Preserve the quantity. Do not expand `2 x6,50` into two separate products.
+            * `OPUST` means a discount and must not be treated as a product.
+            * Apply discounts to the corresponding product line when calculating `unitPricePaid`.
+            * Preserve the quantity. Do not expand multiple units into separate products.
+            * If a product has no discount, use its original unit price as `unitPricePaid`.
+            * Calculate `unitPricePaid` as the final line price after discounts divided by the quantity.
             * Use decimal numbers, not Polish decimal commas.
             * If OCR contains obvious errors, correct them when the intended product name or number is reasonably clear.
-            * If the receipt contains a product without a discount, use its line total as `linePrice`.
-            * Calculate `unitPricePaid` from the final line price divided by quantity rather than simply copying the original unit price.
             * Do not invent missing information. If a value genuinely cannot be determined, return `null`.
+            * Do not include totals, taxes, payment amounts, or discount lines as products.
+            
+            ### Output format
             
             Return JSON only, using this structure:
             
+            ```json
             {
-            "items": [
-            {
-            "name": "string",
-            "quantity": 0,
-            "unitPrice": 0.00,
-            "linePriceBeforeDiscount": 0.00,
-            "discount": 0.00,
-            "linePrice": 0.00,
-            "unitPricePaid": 0.00
+              "items": [
+                {
+                  "name": "string",
+                  "quantity": 2,
+                  "unitPricePaid": 5.20
+                }
+              ]
             }
-            ]
-            }
+            ```
+            
             """;
     /**
      * Key which specifies ChatGPT model.

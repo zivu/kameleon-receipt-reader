@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
 
 @RestController
@@ -33,12 +30,10 @@ public class ReceiptController {
     private final ReceiptService receiptService;
 
     @PostMapping
-    public UUID uploadReceipt(@RequestParam @NonNull MultipartFile receipt) throws IOException {
+    public UUID uploadReceipt(@RequestParam @NonNull MultipartFile receipt) {
         log.info("Received receipt={}", receipt.getName());
         UUID uuid = UUID.randomUUID();
-        Path tempFile = Files.createTempFile("receipt-", ".tmp");
-        receipt.transferTo(tempFile);
-        receiptService.process(tempFile, uuid);
+        receiptService.process(receipt, uuid);
         return uuid;
     }
 
