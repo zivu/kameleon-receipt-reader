@@ -37,8 +37,12 @@ public class ReceiptService {
      * @param uploadedReceipt image file.
      */
     public void process(@NonNull MultipartFile uploadedReceipt, UUID uuid) {
+        log.info("Calling Google Vision for uuid={}", uuid);
         String receiptText = recognitionService.process(uploadedReceipt);
+        log.info("Received response from Google Vision for uuid={}", uuid);
+        log.info("Calling ChatGpt for uuid={}", uuid);
         Items receiptItems = analysisService.analyse(receiptText);
+        log.info("Received response from ChatGpt for uuid={}", uuid);
         Receipt receipt = new Receipt();
         receipt.setId(uuid);
         receipt.setItems(receiptItems.items().stream()
@@ -51,7 +55,9 @@ public class ReceiptService {
                     receiptItem.setUnitPricePaid(item.unitPricePaid());
                     return receiptItem;
                 }).toList());
+        log.info("Saving receipt for uuid={}", uuid);
         receiptRepository.save(receipt);
+        log.info("Saved receipt for uuid={}", uuid);
     }
 
     public Items fetchReceipt(@NonNull UUID receiptId) {
