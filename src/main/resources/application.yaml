@@ -12,12 +12,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-  spring:
-    datasource:
-      url: "jdbc:postgresql://ep-sweet-butterfly-zar5s5sv-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require"
-      username: neondb_owner
-      password: ${NEON_DB_PASS}
-      driver-class-name: org.postgresql.Driver
+  datasource:
+    url: "jdbc:postgresql://ep-sweet-butterfly-zar5s5sv-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require"
+    username: neondb_owner
+    password: ${NEON_DB_PASS}
+    driver-class-name: org.postgresql.Driver
   application:
     name: kameleon-receipts-reader
   servlet:
