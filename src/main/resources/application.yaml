@@ -21,8 +21,8 @@ spring:
     name: kameleon-receipts-reader
   servlet:
     multipart:
-      max-file-size: 4MB
-      max-request-size: 8MB
+      max-file-size: 8MB
+      max-request-size: 12MB
   security:
     oauth2:
       client:
